@@ -21,24 +21,45 @@ export const usePageAnalytics = ({ chapterIndex, subChapterIndex }: PageAnalytic
         isLoggedIn: !!user
       });
 
-      const { data, error } = await supabase
-        .from('page_views')
-        .insert({
-          user_id: user?.id || null,
-          chapter_index: chapterIndex,
-          sub_chapter_index: subChapterIndex,
-          is_logged_in: !!user,
-          time_spent: 0
-        })
-        .select()
-        .single();
+      if (user) {
+        // Record in page_views table for logged-in users
+        const { data, error } = await supabase
+          .from('page_views')
+          .insert({
+            user_id: user.id,
+            chapter_index: chapterIndex,
+            sub_chapter_index: subChapterIndex,
+            is_logged_in: true,
+            time_spent: 0
+          })
+          .select()
+          .single();
 
-      if (error) {
-        console.error('Error recording page view:', error);
-        return;
+        if (error) {
+          console.error('Error recording page view:', error);
+          return;
+        }
+
+        pageViewId.current = data.id;
+      } else {
+        // Record in anonymous_page_views table for non-logged-in users
+        const { data, error } = await supabase
+          .from('anonymous_page_views')
+          .insert({
+            chapter_index: chapterIndex,
+            sub_chapter_index: subChapterIndex,
+            time_spent: 0
+          })
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Error recording anonymous page view:', error);
+          return;
+        }
+
+        pageViewId.current = data.id;
       }
-
-      pageViewId.current = data.id;
     } catch (error) {
       console.error('Error recording page view:', error);
     }
@@ -50,8 +71,10 @@ export const usePageAnalytics = ({ chapterIndex, subChapterIndex }: PageAnalytic
     return () => {
       if (pageViewId.current) {
         const timeSpent = Math.floor((Date.now() - startTime.current) / 1000);
+        const table = user ? 'page_views' : 'anonymous_page_views';
+        
         supabase
-          .from('page_views')
+          .from(table)
           .update({ time_spent: timeSpent })
           .eq('id', pageViewId.current)
           .then(({ error }) => {
@@ -61,5 +84,5 @@ export const usePageAnalytics = ({ chapterIndex, subChapterIndex }: PageAnalytic
           });
       }
     };
-  }, [chapterIndex, subChapterIndex]);
+  }, [chapterIndex, subChapterIndex, user]);
 }; 
