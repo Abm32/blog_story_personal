@@ -162,12 +162,12 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
 
       {/* Navigation Sidebar */}
       <div
-        className={`fixed left-0 top-0 h-full w-full md:w-72 bg-gray-900/95 transform transition-transform duration-300 z-40 overflow-y-auto ${
+        className={`fixed left-0 top-0 h-full w-full md:w-72 bg-gray-900/70 backdrop-blur-sm transform transition-transform duration-300 z-40 overflow-y-auto ${
           isNavigationOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0 md:bg-transparent md:backdrop-blur-none`}
+        } md:translate-x-0 md:bg-gray-900/40`}
       >
         <div className="p-6">
-          <h2 className="text-xl font-bold mb-4">{story.title}</h2>
+          <h2 className="text-xl font-bold mb-4 text-white">{story.title}</h2>
           <div className="space-y-4">
             <button
               onClick={() => {
@@ -175,9 +175,9 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
                 setCurrentSubChapterIndex(-1);
                 setIsNavigationOpen(false);
               }}
-              className={`w-full text-left p-2 rounded hover:bg-gray-800/50 transition-colors ${
-                currentSubChapterIndex === -1 ? 'bg-gray-800/50' : ''
-              } ${bookmark?.chapter_index === 0 && bookmark?.sub_chapter_index === -1 ? 'text-blue-400' : ''}`}
+              className={`w-full text-left p-2 rounded hover:bg-gray-800/70 transition-colors ${
+                currentSubChapterIndex === -1 ? 'bg-gray-800/70' : ''
+              } ${bookmark?.chapter_index === 0 && bookmark?.sub_chapter_index === -1 ? 'text-blue-400' : 'text-gray-100'}`}
             >
               Prologue
             </button>
@@ -190,8 +190,8 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
                     setCurrentSubChapterIndex(0);
                     setIsNavigationOpen(false);
                   }}
-                  className={`w-full text-left p-2 rounded hover:bg-gray-800/50 transition-colors font-semibold ${
-                    bookmark?.chapter_index === chapterIdx && bookmark?.sub_chapter_index === 0 ? 'text-blue-400' : ''
+                  className={`w-full text-left p-2 rounded hover:bg-gray-800/70 transition-colors font-semibold ${
+                    bookmark?.chapter_index === chapterIdx && bookmark?.sub_chapter_index === 0 ? 'text-blue-400' : 'text-gray-100'
                   }`}
                 >
                   {chapter.title}
@@ -209,11 +209,11 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
                       setCurrentSubChapterIndex(subIdx);
                       setIsNavigationOpen(false);
                     }}
-                    className={`w-full text-left p-2 pl-6 rounded hover:bg-gray-800/50 transition-colors ${
+                    className={`w-full text-left p-2 pl-6 rounded hover:bg-gray-800/70 transition-colors ${
                       currentChapterIndex === chapterIdx && currentSubChapterIndex === subIdx
-                        ? 'bg-gray-800/50'
+                        ? 'bg-gray-800/70'
                         : ''
-                    } ${bookmark?.chapter_index === chapterIdx && bookmark?.sub_chapter_index === subIdx ? 'text-blue-400' : ''}`}
+                    } ${bookmark?.chapter_index === chapterIdx && bookmark?.sub_chapter_index === subIdx ? 'text-blue-400' : 'text-gray-100'}`}
                   >
                     {subChapter.title}
                   </button>
@@ -229,18 +229,21 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
         className="container mx-auto px-4 py-16 max-w-3xl relative z-10"
         onClick={() => setIsNavigationOpen(false)}
       >
+        {/* Content Background */}
+        <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm rounded-2xl -z-10"></div>
+        
         <div className="mb-8 space-y-2">
           {currentSubChapterIndex !== -1 && (
-            <div className="text-sm text-gray-400 tracking-wider uppercase text-center">
+            <div className="text-sm text-gray-300 tracking-wider uppercase text-center">
               {story.chapters[currentChapterIndex].title}
             </div>
           )}
-          <h1 className="text-3xl font-bold text-center">{getCurrentTitle()}</h1>
+          <h1 className="text-3xl font-bold text-center text-white">{getCurrentTitle()}</h1>
         </div>
         
         <div className="prose prose-invert mx-auto">
           {getCurrentContent()?.split('\n\n').map((paragraph, idx) => (
-            <p key={idx} className="mb-6 leading-relaxed">
+            <p key={idx} className="mb-6 leading-relaxed text-gray-100">
               {paragraph}
             </p>
           ))}
@@ -251,7 +254,7 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
           <button
             onClick={() => handleNavigation('prev')}
             disabled={currentChapterIndex === 0 && currentSubChapterIndex === -1}
-            className="p-2 rounded-full bg-gray-800/50 hover:bg-gray-700/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2 rounded-full bg-gray-800/70 hover:bg-gray-700/70 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ChevronLeft size={24} />
           </button>
@@ -263,7 +266,7 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
               currentSubChapterIndex ===
                 (story.chapters[currentChapterIndex].subChapters?.length ?? 0) - 1
             }
-            className="p-2 rounded-full bg-gray-800/50 hover:bg-gray-700/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2 rounded-full bg-gray-800/70 hover:bg-gray-700/70 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ChevronRight size={24} />
           </button>
