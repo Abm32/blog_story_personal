@@ -127,7 +127,9 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
       {/* Mobile Navigation Toggle */}
       <button
         onClick={() => setIsNavigationOpen(!isNavigationOpen)}
-        className="fixed top-4 left-4 z-[100] p-2 rounded-full bg-gray-800/70 hover:bg-gray-700/70 transition-colors md:hidden"
+        className={`fixed top-4 left-4 z-[100] p-2 rounded-full bg-gray-800/70 hover:bg-gray-700/70 transition-colors md:hidden ${
+          isNavigationOpen ? 'z-[200]' : ''
+        }`}
         title={isNavigationOpen ? "Close book index" : "Open book index"}
       >
         {isNavigationOpen ? <X size={24} /> : <Menu size={24} />}
@@ -143,7 +145,9 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
       </button>
 
       {/* Top Right Controls */}
-      <div className="fixed top-4 right-4 z-[100] flex items-center space-x-4">
+      <div className={`fixed top-4 right-4 z-[100] flex items-center space-x-4 ${
+        isNavigationOpen ? 'z-[150]' : ''
+      }`}>
         {/* Bookmark Button */}
         <button
           onClick={handleSaveBookmark}
@@ -164,7 +168,7 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
 
       {/* Navigation Sidebar */}
       <div
-        className={`fixed left-0 top-0 h-full w-full md:w-72 bg-gray-900/90 backdrop-blur-sm transform transition-transform duration-300 z-[90] overflow-y-auto ${
+        className={`fixed left-0 top-0 h-full w-full md:w-72 bg-gray-900/95 backdrop-blur-sm transform transition-transform duration-300 z-[200] overflow-y-auto ${
           isNavigationOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >

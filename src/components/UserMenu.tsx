@@ -61,7 +61,7 @@ export const UserMenu: React.FC = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-lg py-1 z-[100]">
+        <div className="absolute right-0 mt-2 w-48 bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-lg py-1 z-[100]">
           <button
             onClick={() => {
               signOut();
