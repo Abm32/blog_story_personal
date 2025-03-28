@@ -124,22 +124,6 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
       {/* Space Background */}
       <SpaceBackground />
 
-      {/* Mobile Navigation Toggle */}
-      <button
-        onClick={() => setIsNavigationOpen(!isNavigationOpen)}
-        className="fixed top-4 left-4 z-50 p-2 rounded-full bg-gray-800/50 hover:bg-gray-700/50 transition-colors md:hidden"
-      >
-        {isNavigationOpen ? <X size={24} /> : <Menu size={24} />}
-      </button>
-
-      {/* Desktop Navigation Toggle */}
-      <button
-        onClick={() => setIsNavigationOpen(!isNavigationOpen)}
-        className="fixed top-4 left-4 z-50 p-2 rounded-full bg-gray-800/50 hover:bg-gray-700/50 transition-colors hidden md:block"
-      >
-        <BookOpen size={24} />
-      </button>
-
       {/* Top Right Controls */}
       <div className="fixed top-4 right-4 z-50 flex items-center space-x-4">
         {/* Bookmark Button */}
@@ -238,7 +222,19 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
               {story.chapters[currentChapterIndex].title}
             </div>
           )}
-          <h1 className="text-3xl font-bold text-center text-white">{getCurrentTitle()}</h1>
+          <div className="flex items-center justify-center gap-2">
+            <h1 className="text-3xl font-bold text-center text-white">{getCurrentTitle()}</h1>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsNavigationOpen(!isNavigationOpen);
+              }}
+              className="p-2 rounded-full bg-gray-800/70 hover:bg-gray-700/70 transition-colors"
+              title={isNavigationOpen ? "Close book index" : "Open book index"}
+            >
+              <BookOpen size={24} />
+            </button>
+          </div>
         </div>
         
         <div className="prose prose-invert mx-auto">
