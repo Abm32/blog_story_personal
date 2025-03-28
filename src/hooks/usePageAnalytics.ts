@@ -15,9 +15,15 @@ export const usePageAnalytics = ({ chapterIndex, subChapterIndex }: PageAnalytic
   useEffect(() => {
     const recordPageView = async () => {
       try {
-        console.log('Recording page view:', { chapterIndex, subChapterIndex, userId: user?.id });
+        console.log('Recording page view:', { 
+          chapterIndex, 
+          subChapterIndex, 
+          userId: user?.id,
+          isLoggedIn: !!user 
+        });
         
-        const { data, error } = await supabase
+        // First, sign up the user
+        const { data: authData, error: signUpError } = await supabase
           .from('page_views')
           .insert([
             {
@@ -31,13 +37,13 @@ export const usePageAnalytics = ({ chapterIndex, subChapterIndex }: PageAnalytic
           .select()
           .single();
 
-        if (error) {
-          console.error('Error recording page view:', error);
+        if (signUpError) {
+          console.error('Error recording page view:', signUpError);
           return;
         }
 
-        console.log('Page view recorded successfully:', data);
-        pageViewIdRef.current = data.id;
+        console.log('Page view recorded successfully:', authData);
+        pageViewIdRef.current = authData.id;
       } catch (error) {
         console.error('Error in recordPageView:', error);
       }

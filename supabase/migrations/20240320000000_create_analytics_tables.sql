@@ -11,6 +11,10 @@ CREATE TABLE IF NOT EXISTS profiles (
 -- Enable RLS for profiles
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+
 -- Allow users to view their own profile
 CREATE POLICY "Users can view own profile"
     ON profiles FOR SELECT
@@ -24,7 +28,7 @@ CREATE POLICY "Users can update own profile"
     USING (auth.uid() = id);
 
 -- Create page_views table
-CREATE TABLE page_views (
+CREATE TABLE IF NOT EXISTS page_views (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id),
     chapter_index INTEGER NOT NULL,
@@ -35,14 +39,19 @@ CREATE TABLE page_views (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- Create RLS policies for page_views
+-- Enable RLS for page_views
 ALTER TABLE page_views ENABLE ROW LEVEL SECURITY;
 
--- Allow anyone to insert page views
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Allow anyone to insert page views" ON page_views;
+DROP POLICY IF EXISTS "Users can view their own page views" ON page_views;
+DROP POLICY IF EXISTS "Admin can view all page views" ON page_views;
+
+-- Allow anyone to insert page views (including anonymous users)
 CREATE POLICY "Allow anyone to insert page views"
     ON page_views
     FOR INSERT
-    TO public
+    TO anon, authenticated
     WITH CHECK (true);
 
 -- Only allow authenticated users to view their own page views
