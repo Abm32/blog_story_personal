@@ -5,6 +5,7 @@ import { SignUpModal } from './SignUpModal';
 
 export const UserMenu: React.FC = () => {
   const { user, signOut } = useAuthStore();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +33,7 @@ export const UserMenu: React.FC = () => {
       setIsLoading(true);
       setError(null);
       await signOut();
-      setIsModalOpen(false);
+      setIsDropdownOpen(false);
     } catch (err: any) {
       setError(err.message);
       console.error('Sign out error:', err);
@@ -46,15 +47,15 @@ export const UserMenu: React.FC = () => {
       {user ? (
         <>
           <button
-            onClick={() => setIsModalOpen(!isModalOpen)}
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="flex items-center space-x-2 p-2 rounded-full hover:bg-gray-800/70 transition-colors"
           >
             <User size={24} />
             <span className="text-sm">{user.user_metadata?.full_name || user.email}</span>
-            <ChevronDown size={16} className={`transform transition-transform ${isModalOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown size={16} className={`transform transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
           </button>
 
-          {isModalOpen && (
+          {isDropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-lg py-1 z-[100]">
               {error && (
                 <div className="px-4 py-2 text-sm text-red-500">
