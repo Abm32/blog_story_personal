@@ -120,7 +120,7 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
     }
   };
 
-  // Add page analytics tracking
+  // Add page analytics tracking with proper indices
   usePageAnalytics({
     chapterIndex: currentChapterIndex,
     subChapterIndex: currentSubChapterIndex,

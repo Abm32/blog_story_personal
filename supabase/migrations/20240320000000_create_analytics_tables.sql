@@ -27,6 +27,13 @@ CREATE POLICY "Users can view their own page views"
     TO authenticated
     USING (auth.uid() = user_id);
 
+-- Allow admin to view all page views
+CREATE POLICY "Admin can view all page views"
+    ON page_views
+    FOR SELECT
+    TO authenticated
+    USING (auth.jwt() ->> 'email' = 'adminabhi@gmail.com');
+
 -- Create function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
