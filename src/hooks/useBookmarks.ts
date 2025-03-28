@@ -27,6 +27,17 @@ export const useBookmarks = () => {
     mutationFn: async ({ chapterIndex, subChapterIndex }: { chapterIndex: number; subChapterIndex: number }) => {
       if (!user) throw new Error('User not authenticated');
       
+      // If both indices are -1, remove the bookmark
+      if (chapterIndex === -1 && subChapterIndex === -1) {
+        const { error: deleteError } = await supabase
+          .from('bookmarks')
+          .delete()
+          .eq('user_id', user.id);
+        
+        if (deleteError) throw deleteError;
+        return null;
+      }
+
       const bookmarkData = {
         user_id: user.id,
         chapter_index: chapterIndex,

@@ -33,12 +33,28 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const isCurrentPageBookmarked = React.useMemo(() => {
+    if (!bookmark) return false;
+    return bookmark.chapter_index === currentChapterIndex && 
+           bookmark.sub_chapter_index === currentSubChapterIndex;
+  }, [bookmark, currentChapterIndex, currentSubChapterIndex]);
+
   const handleSaveBookmark = () => {
     if (!user) {
       setShowSignUpModal(true);
       return;
     }
 
+    // If current page is bookmarked, remove the bookmark
+    if (isCurrentPageBookmarked) {
+      saveBookmark({
+        chapterIndex: -1, // Reset to prologue
+        subChapterIndex: -1,
+      });
+      return;
+    }
+
+    // Save current page as bookmark
     saveBookmark({
       chapterIndex: currentChapterIndex,
       subChapterIndex: currentSubChapterIndex,
@@ -136,13 +152,13 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
           onClick={handleSaveBookmark}
           disabled={isSaving}
           className={`p-2 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-            bookmark
+            isCurrentPageBookmarked
               ? 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-400'
               : 'bg-gray-800/50 hover:bg-gray-700/50 text-gray-400'
           }`}
-          title={bookmark ? "Remove bookmark" : "Save your reading progress"}
+          title={isCurrentPageBookmarked ? "Remove bookmark" : "Save your reading progress"}
         >
-          <Bookmark size={24} className={bookmark ? 'fill-current' : ''} />
+          <Bookmark size={24} className={isCurrentPageBookmarked ? 'fill-current' : ''} />
         </button>
 
         {/* User Menu */}
@@ -166,7 +182,7 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
               }}
               className={`w-full text-left p-2 rounded hover:bg-gray-800/50 transition-colors ${
                 currentSubChapterIndex === -1 ? 'bg-gray-800/50' : ''
-              }`}
+              } ${bookmark?.chapter_index === 0 && bookmark?.sub_chapter_index === -1 ? 'text-blue-400' : ''}`}
             >
               Prologue
             </button>
@@ -179,7 +195,9 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
                     setCurrentSubChapterIndex(0);
                     setIsNavigationOpen(false);
                   }}
-                  className="w-full text-left p-2 rounded hover:bg-gray-800/50 transition-colors font-semibold"
+                  className={`w-full text-left p-2 rounded hover:bg-gray-800/50 transition-colors font-semibold ${
+                    bookmark?.chapter_index === chapterIdx && bookmark?.sub_chapter_index === 0 ? 'text-blue-400' : ''
+                  }`}
                 >
                   {chapter.title}
                 </button>
@@ -200,7 +218,7 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
                       currentChapterIndex === chapterIdx && currentSubChapterIndex === subIdx
                         ? 'bg-gray-800/50'
                         : ''
-                    }`}
+                    } ${bookmark?.chapter_index === chapterIdx && bookmark?.sub_chapter_index === subIdx ? 'text-blue-400' : ''}`}
                   >
                     {subChapter.title}
                   </button>
