@@ -177,7 +177,7 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
             <h2 className="text-xl font-bold text-white">{story.title}</h2>
             <button
               onClick={() => setIsNavigationOpen(false)}
-              className="p-2 rounded-full hover:bg-gray-800/70 transition-colors md:hidden"
+              className="p-2 rounded-full hover:bg-gray-800/70 transition-colors"
               title="Close book index"
             >
               <X size={20} />
