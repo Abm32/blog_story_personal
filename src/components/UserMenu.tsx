@@ -10,8 +10,15 @@ export const UserMenu: React.FC = () => {
   const signOut = useAuthStore((state) => state.signOut);
 
   const handleAuthClick = (login: boolean) => {
+    console.log('Auth button clicked:', { login, currentModalState: isModalOpen });
     setIsLogin(login);
     setIsModalOpen(true);
+    console.log('Modal state updated:', { isLogin: login, isModalOpen: true });
+  };
+
+  const handleCloseModal = () => {
+    console.log('Closing modal');
+    setIsModalOpen(false);
   };
 
   if (!user) {
@@ -29,6 +36,12 @@ export const UserMenu: React.FC = () => {
         >
           Sign Up
         </button>
+
+        <SignUpModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          isLogin={isLogin}
+        />
       </div>
     );
   }
@@ -47,7 +60,7 @@ export const UserMenu: React.FC = () => {
 
       <SignUpModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
         isLogin={isLogin}
       />
     </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/useStore';
 
@@ -16,6 +16,10 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({ isOpen, onClose, isLog
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const setUser = useAuthStore((state) => state.setUser);
+
+  useEffect(() => {
+    console.log('Modal state changed:', { isOpen, isLogin });
+  }, [isOpen, isLogin]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,10 +97,15 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({ isOpen, onClose, isLog
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    console.log('Modal not rendering because isOpen is false');
+    return null;
+  }
+
+  console.log('Rendering modal with props:', { isOpen, isLogin });
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100]">
       <div className="bg-gray-900 p-8 rounded-lg shadow-xl w-full max-w-md relative">
         <button
           onClick={onClose}
