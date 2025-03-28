@@ -5,9 +5,10 @@ import { useAuthStore } from '../store/useStore';
 interface SignUpModalProps {
   isOpen: boolean;
   onClose: () => void;
+  isLogin?: boolean;
 }
 
-export const SignUpModal: React.FC<SignUpModalProps> = ({ isOpen, onClose }) => {
+export const SignUpModal: React.FC<SignUpModalProps> = ({ isOpen, onClose, isLogin = false }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
@@ -16,63 +17,77 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({ isOpen, onClose }) => 
   const [loading, setLoading] = useState(false);
   const setUser = useAuthStore((state) => state.setUser);
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
-      console.log('Attempting signup with:', { email, username, fullName });
-      
-      // First, sign up the user
-      const { data: authData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            username,
-            full_name: fullName,
+      if (isLogin) {
+        console.log('Attempting login with:', { email });
+        const { data, error: loginError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (loginError) {
+          console.error('Login error:', loginError);
+          throw loginError;
+        }
+
+        console.log('Login successful:', data);
+        setUser(data.user);
+      } else {
+        console.log('Attempting signup with:', { email, username, fullName });
+        
+        // First, sign up the user
+        const { data: authData, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              username,
+              full_name: fullName,
+            },
           },
-        },
-      });
+        });
 
-      if (signUpError) {
-        console.error('Signup error:', signUpError);
-        throw signUpError;
+        if (signUpError) {
+          console.error('Signup error:', signUpError);
+          throw signUpError;
+        }
+
+        console.log('Auth signup successful:', authData);
+
+        if (!authData.user) {
+          throw new Error('No user data returned from signup');
+        }
+
+        // Then, create the profile
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([
+            {
+              id: authData.user.id,
+              username,
+              full_name: fullName,
+              email,
+              updated_at: new Date().toISOString(),
+            },
+          ]);
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+          throw profileError;
+        }
+
+        console.log('Profile created successfully');
+        setUser(authData.user);
       }
-
-      console.log('Auth signup successful:', authData);
-
-      if (!authData.user) {
-        throw new Error('No user data returned from signup');
-      }
-
-      // Then, create the profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([
-          {
-            id: authData.user.id,
-            username,
-            full_name: fullName,
-            email,
-            updated_at: new Date().toISOString(),
-          },
-        ]);
-
-      if (profileError) {
-        console.error('Profile creation error:', profileError);
-        throw profileError;
-      }
-
-      console.log('Profile created successfully');
-
-      // Update the user in the store
-      setUser(authData.user);
       onClose();
     } catch (err) {
-      console.error('Error during signup:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred during signup');
+      console.error('Error during auth:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred during authentication');
     } finally {
       setLoading(false);
     }
@@ -92,34 +107,38 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({ isOpen, onClose }) => 
           </svg>
         </button>
 
-        <h2 className="text-2xl font-bold text-white mb-6">Sign Up</h2>
-        <form onSubmit={handleSignUp} className="space-y-4">
+        <h2 className="text-2xl font-bold text-white mb-6">{isLogin ? 'Login' : 'Sign Up'}</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {!isLogin && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Username</label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full px-4 py-2 bg-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 text-white"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Full Name</label>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="w-full px-4 py-2 bg-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 text-white"
+                  required
+                />
+              </div>
+            </>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 text-white"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Username</label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 text-white"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Full Name</label>
-            <input
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
               className="w-full px-4 py-2 bg-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 text-white"
               required
             />
@@ -142,7 +161,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({ isOpen, onClose }) => 
             disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50"
           >
-            {loading ? 'Signing up...' : 'Sign Up'}
+            {loading ? (isLogin ? 'Logging in...' : 'Signing up...') : (isLogin ? 'Login' : 'Sign Up')}
           </button>
         </form>
       </div>
