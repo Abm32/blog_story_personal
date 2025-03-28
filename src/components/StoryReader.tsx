@@ -124,8 +124,26 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
       {/* Space Background */}
       <SpaceBackground />
 
+      {/* Mobile Navigation Toggle */}
+      <button
+        onClick={() => setIsNavigationOpen(!isNavigationOpen)}
+        className="fixed top-4 left-4 z-[100] p-2 rounded-full bg-gray-800/70 hover:bg-gray-700/70 transition-colors md:hidden"
+        title={isNavigationOpen ? "Close book index" : "Open book index"}
+      >
+        {isNavigationOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
+      {/* Desktop Navigation Toggle */}
+      <button
+        onClick={() => setIsNavigationOpen(!isNavigationOpen)}
+        className="fixed top-4 left-4 z-[100] p-2 rounded-full bg-gray-800/70 hover:bg-gray-700/70 transition-colors hidden md:block"
+        title={isNavigationOpen ? "Close book index" : "Open book index"}
+      >
+        <BookOpen size={24} />
+      </button>
+
       {/* Top Right Controls */}
-      <div className="fixed top-4 right-4 z-50 flex items-center space-x-4">
+      <div className="fixed top-4 right-4 z-[100] flex items-center space-x-4">
         {/* Bookmark Button */}
         <button
           onClick={handleSaveBookmark}
@@ -133,7 +151,7 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
           className={`p-2 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
             isCurrentPageBookmarked
               ? 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-400'
-              : 'bg-gray-800/50 hover:bg-gray-700/50 text-gray-400'
+              : 'bg-gray-800/70 hover:bg-gray-700/70 text-gray-400'
           }`}
           title={isCurrentPageBookmarked ? "Remove bookmark" : "Save your reading progress"}
         >
@@ -146,12 +164,21 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
 
       {/* Navigation Sidebar */}
       <div
-        className={`fixed left-0 top-0 h-full w-full md:w-72 bg-gray-900/70 backdrop-blur-sm transform transition-transform duration-300 z-40 overflow-y-auto ${
+        className={`fixed left-0 top-0 h-full w-full md:w-72 bg-gray-900/90 backdrop-blur-sm transform transition-transform duration-300 z-[90] overflow-y-auto ${
           isNavigationOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0 md:bg-gray-900/40`}
+        }`}
       >
         <div className="p-6">
-          <h2 className="text-xl font-bold mb-4 text-white">{story.title}</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-white">{story.title}</h2>
+            <button
+              onClick={() => setIsNavigationOpen(false)}
+              className="p-2 rounded-full hover:bg-gray-800/70 transition-colors md:hidden"
+              title="Close book index"
+            >
+              <X size={20} />
+            </button>
+          </div>
           <div className="space-y-4">
             <button
               onClick={() => {
@@ -222,19 +249,7 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
               {story.chapters[currentChapterIndex].title}
             </div>
           )}
-          <div className="flex items-center justify-center gap-2">
-            <h1 className="text-3xl font-bold text-center text-white">{getCurrentTitle()}</h1>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsNavigationOpen(!isNavigationOpen);
-              }}
-              className="p-2 rounded-full bg-gray-800/70 hover:bg-gray-700/70 transition-colors"
-              title={isNavigationOpen ? "Close book index" : "Open book index"}
-            >
-              <BookOpen size={24} />
-            </button>
-          </div>
+          <h1 className="text-3xl font-bold text-center text-white">{getCurrentTitle()}</h1>
         </div>
         
         <div className="prose prose-invert mx-auto">
