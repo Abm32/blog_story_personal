@@ -1,3 +1,28 @@
+-- Create profiles table
+CREATE TABLE IF NOT EXISTS profiles (
+    id UUID REFERENCES auth.users(id) PRIMARY KEY,
+    username TEXT UNIQUE NOT NULL,
+    full_name TEXT,
+    email TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+-- Enable RLS for profiles
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+-- Allow users to view their own profile
+CREATE POLICY "Users can view own profile"
+    ON profiles FOR SELECT
+    TO authenticated
+    USING (auth.uid() = id);
+
+-- Allow users to update their own profile
+CREATE POLICY "Users can update own profile"
+    ON profiles FOR UPDATE
+    TO authenticated
+    USING (auth.uid() = id);
+
 -- Create page_views table
 CREATE TABLE page_views (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
