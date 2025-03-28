@@ -1,46 +1,76 @@
 import React, { useState } from 'react';
 import { User, LogOut, ChevronDown } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/useStore';
-import { useProfile } from '../hooks/useProfile';
+import { SignUpModal } from './SignUpModal';
 
 export const UserMenu: React.FC = () => {
+  const { user, signOut } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
-  const user = useAuthStore((state) => state.user);
-  const setUser = useAuthStore((state) => state.setUser);
-  const { profile } = useProfile();
+  const [showSignUpModal, setShowSignUpModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setIsOpen(false);
-  };
-
-  if (!user) return null;
+  if (!user) {
+    return (
+      <>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setShowLoginModal(true)}
+            className="px-4 py-2 rounded-full bg-gray-800/70 hover:bg-gray-700/70 text-gray-300 transition-colors"
+          >
+            Login
+          </button>
+          <button
+            onClick={() => setShowSignUpModal(true)}
+            className="px-4 py-2 rounded-full bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 transition-colors"
+          >
+            Sign Up
+          </button>
+        </div>
+        {showSignUpModal && (
+          <SignUpModal
+            onClose={() => setShowSignUpModal(false)}
+            onSignUp={() => {
+              setShowSignUpModal(false);
+              // User will be automatically authenticated through Supabase's auth state change
+            }}
+          />
+        )}
+        {showLoginModal && (
+          <SignUpModal
+            onClose={() => setShowLoginModal(false)}
+            onSignUp={() => {
+              setShowLoginModal(false);
+              // User will be automatically authenticated through Supabase's auth state change
+            }}
+            isLogin={true}
+          />
+        )}
+      </>
+    );
+  }
 
   return (
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 px-4 py-2 rounded-full bg-gray-800/50 hover:bg-gray-700/50 transition-colors"
+        className="flex items-center space-x-2 p-2 rounded-full hover:bg-gray-800/70 transition-colors"
       >
-        <User size={20} />
-        <span className="text-sm font-medium">{profile?.username || user.email}</span>
-        <ChevronDown size={16} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <User size={24} />
+        <span className="text-sm">{user.user_metadata?.full_name || user.email}</span>
+        <ChevronDown size={16} className={`transform transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-gray-900 rounded-lg shadow-lg py-2">
-          <div className="px-4 py-2 border-b border-gray-800">
-            <p className="text-sm font-medium">{profile?.full_name}</p>
-            <p className="text-xs text-gray-400">{user.email}</p>
-          </div>
+        <div className="absolute right-0 mt-2 w-48 bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-lg py-1 z-[100]">
           <button
-            onClick={handleLogout}
-            className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-gray-800/50 transition-colors flex items-center space-x-2"
+            onClick={() => {
+              signOut();
+              setIsOpen(false);
+            }}
+            className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/70 transition-colors"
           >
             <LogOut size={16} />
-            <span>Logout</span>
+            <span>Sign Out</span>
           </button>
         </div>
       )}
