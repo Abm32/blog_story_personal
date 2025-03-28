@@ -7,6 +7,7 @@ import { useAuthStore, useReadingStore, useNavigationStore } from '../store/useS
 import { useBookmarks } from '../hooks/useBookmarks';
 import { UserMenu } from './UserMenu';
 import { SpaceBackground } from './SpaceBackground';
+import { usePageAnalytics } from '../hooks/usePageAnalytics';
 
 interface StoryReaderProps {
   story: Story;
@@ -118,6 +119,12 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
       }
     }
   };
+
+  // Add page analytics tracking
+  usePageAnalytics({
+    chapterIndex: currentChapterIndex,
+    subChapterIndex: currentSubChapterIndex,
+  });
 
   return (
     <div className="min-h-screen bg-[#0a0b1e] text-gray-200 relative">
