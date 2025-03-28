@@ -5,7 +5,6 @@ import { SignUpModal } from './SignUpModal';
 import { supabase } from '../lib/supabase';
 import { useAuthStore, useReadingStore, useNavigationStore } from '../store/useStore';
 import { useBookmarks } from '../hooks/useBookmarks';
-import { UserMenu } from './UserMenu';
 import { SpaceBackground } from './SpaceBackground';
 import { usePageAnalytics } from '../hooks/usePageAnalytics';
 
@@ -169,8 +168,6 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
           <Bookmark size={24} className={isCurrentPageBookmarked ? 'fill-current' : ''} />
         </button>
 
-        {/* User Menu */}
-        <UserMenu />
       </div>
 
       {/* Navigation Sidebar */}
