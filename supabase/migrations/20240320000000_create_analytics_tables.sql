@@ -1,9 +1,12 @@
 -- Create profiles table if it doesn't exist
 CREATE TABLE IF NOT EXISTS profiles (
     id UUID REFERENCES auth.users(id) PRIMARY KEY,
-    username TEXT UNIQUE,
-    full_name TEXT,
-    email TEXT,
+    username TEXT UNIQUE NOT NULL,
+    full_name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    avatar_url TEXT,
+    bio TEXT,
+    website TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
@@ -51,19 +54,19 @@ ALTER TABLE page_views ENABLE ROW LEVEL SECURITY;
 ALTER TABLE anonymous_page_views ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies if they exist
-DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
-DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can view their own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can update their own profile" ON profiles;
 DROP POLICY IF EXISTS "Users can manage own preferences" ON user_preferences;
 DROP POLICY IF EXISTS "Allow anyone to insert page views" ON page_views;
 DROP POLICY IF EXISTS "Users can view own page views" ON page_views;
 DROP POLICY IF EXISTS "Allow anonymous page views" ON anonymous_page_views;
 
 -- Create policies for profiles
-CREATE POLICY "Users can view own profile"
+CREATE POLICY "Users can view their own profile"
     ON profiles FOR SELECT
     USING (auth.uid() = id);
 
-CREATE POLICY "Users can update own profile"
+CREATE POLICY "Users can update their own profile"
     ON profiles FOR UPDATE
     USING (auth.uid() = id);
 
@@ -100,6 +103,7 @@ $$ language 'plpgsql';
 DROP TRIGGER IF EXISTS update_page_views_updated_at ON page_views;
 DROP TRIGGER IF EXISTS update_anonymous_page_views_updated_at ON anonymous_page_views;
 DROP TRIGGER IF EXISTS update_user_preferences_updated_at ON user_preferences;
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON profiles;
 
 -- Create triggers
 CREATE TRIGGER update_page_views_updated_at
@@ -114,5 +118,10 @@ CREATE TRIGGER update_anonymous_page_views_updated_at
 
 CREATE TRIGGER update_user_preferences_updated_at
     BEFORE UPDATE ON user_preferences
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_profiles_updated_at
+    BEFORE UPDATE ON profiles
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column(); 
