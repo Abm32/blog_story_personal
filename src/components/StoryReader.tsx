@@ -1,11 +1,12 @@
 import React from 'react';
-import { Star, ChevronLeft, ChevronRight, BookOpen, Bookmark } from 'lucide-react';
+import { Star, ChevronLeft, ChevronRight, BookOpen, Bookmark, Menu, X } from 'lucide-react';
 import { Story, Chapter, SubChapter } from '../types/story';
 import { SignUpModal } from './SignUpModal';
 import { supabase } from '../lib/supabase';
 import { useAuthStore, useReadingStore, useNavigationStore } from '../store/useStore';
 import { useBookmarks } from '../hooks/useBookmarks';
 import { UserMenu } from './UserMenu';
+import { SpaceBackground } from './SpaceBackground';
 
 interface StoryReaderProps {
   story: Story;
@@ -120,27 +121,21 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
 
   return (
     <div className="min-h-screen bg-[#0a0b1e] text-gray-200 relative">
-      {/* Animated stars background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {[...Array(50)].map((_, i) => (
-          <Star
-            key={i}
-            className="absolute animate-pulse text-white/20"
-            size={Math.random() * 4 + 2}
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${Math.random() * 3 + 2}s`,
-            }}
-          />
-        ))}
-      </div>
+      {/* Space Background */}
+      <SpaceBackground />
 
-      {/* Navigation Toggle */}
+      {/* Mobile Navigation Toggle */}
       <button
         onClick={() => setIsNavigationOpen(!isNavigationOpen)}
-        className="fixed top-4 left-4 z-50 p-2 rounded-full bg-gray-800/50 hover:bg-gray-700/50 transition-colors"
+        className="fixed top-4 left-4 z-50 p-2 rounded-full bg-gray-800/50 hover:bg-gray-700/50 transition-colors md:hidden"
+      >
+        {isNavigationOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
+      {/* Desktop Navigation Toggle */}
+      <button
+        onClick={() => setIsNavigationOpen(!isNavigationOpen)}
+        className="fixed top-4 left-4 z-50 p-2 rounded-full bg-gray-800/50 hover:bg-gray-700/50 transition-colors hidden md:block"
       >
         <BookOpen size={24} />
       </button>
@@ -167,9 +162,9 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
 
       {/* Navigation Sidebar */}
       <div
-        className={`fixed left-0 top-0 h-full w-72 bg-gray-900/95 transform transition-transform duration-300 z-40 overflow-y-auto ${
+        className={`fixed left-0 top-0 h-full w-full md:w-72 bg-gray-900/95 transform transition-transform duration-300 z-40 overflow-y-auto ${
           isNavigationOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        } md:translate-x-0 md:bg-transparent md:backdrop-blur-none`}
       >
         <div className="p-6">
           <h2 className="text-xl font-bold mb-4">{story.title}</h2>
