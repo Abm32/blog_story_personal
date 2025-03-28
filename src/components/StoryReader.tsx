@@ -1,34 +1,49 @@
-import React, { useState } from 'react';
-import { Star, ChevronLeft, ChevronRight, BookOpen } from 'lucide-react';
+import React from 'react';
+import { Star, ChevronLeft, ChevronRight, BookOpen, Bookmark } from 'lucide-react';
 import { Story, Chapter, SubChapter } from '../types/story';
 import { SignUpModal } from './SignUpModal';
 import { supabase } from '../lib/supabase';
+import { useAuthStore, useReadingStore, useNavigationStore } from '../store/useStore';
+import { useBookmarks } from '../hooks/useBookmarks';
+import { UserMenu } from './UserMenu';
 
 interface StoryReaderProps {
   story: Story;
 }
 
 export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
-  const [currentChapterIndex, setCurrentChapterIndex] = useState(0);
-  const [currentSubChapterIndex, setCurrentSubChapterIndex] = useState(-1); // -1 represents prologue
-  const [isNavigationOpen, setIsNavigationOpen] = useState(false);
-  const [showSignUpModal, setShowSignUpModal] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const user = useAuthStore((state) => state.user);
+  const { currentChapterIndex, currentSubChapterIndex, setCurrentChapterIndex, setCurrentSubChapterIndex } = useReadingStore();
+  const { isNavigationOpen, setIsNavigationOpen } = useNavigationStore();
+  const [showSignUpModal, setShowSignUpModal] = React.useState(false);
+  const { bookmark, saveBookmark, isSaving } = useBookmarks();
 
   React.useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session);
+      useAuthStore.getState().setUser(session?.user ?? null);
     };
     
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
+      useAuthStore.getState().setUser(session?.user ?? null);
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const handleSaveBookmark = () => {
+    if (!user) {
+      setShowSignUpModal(true);
+      return;
+    }
+
+    saveBookmark({
+      chapterIndex: currentChapterIndex,
+      subChapterIndex: currentSubChapterIndex,
+    });
+  };
 
   const getCurrentContent = () => {
     if (currentSubChapterIndex === -1) {
@@ -60,8 +75,7 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
     if (direction === 'next') {
       const currentChapter = story.chapters[currentChapterIndex];
       
-      // Check if we need to show signup modal
-      if (currentSubChapterIndex === 2 && !isAuthenticated) {
+      if (currentSubChapterIndex === 2 && !user) {
         setShowSignUpModal(true);
         return;
       }
@@ -115,6 +129,26 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
         <BookOpen size={24} />
       </button>
 
+      {/* Top Right Controls */}
+      <div className="fixed top-4 right-4 z-50 flex items-center space-x-4">
+        {/* Bookmark Button */}
+        <button
+          onClick={handleSaveBookmark}
+          disabled={isSaving}
+          className={`p-2 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+            bookmark
+              ? 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-400'
+              : 'bg-gray-800/50 hover:bg-gray-700/50 text-gray-400'
+          }`}
+          title={bookmark ? "Remove bookmark" : "Save your reading progress"}
+        >
+          <Bookmark size={24} className={bookmark ? 'fill-current' : ''} />
+        </button>
+
+        {/* User Menu */}
+        <UserMenu />
+      </div>
+
       {/* Navigation Sidebar */}
       <div
         className={`fixed left-0 top-0 h-full w-72 bg-gray-900/95 transform transition-transform duration-300 z-40 overflow-y-auto ${
@@ -154,7 +188,7 @@ export const StoryReader: React.FC<StoryReaderProps> = ({ story }) => {
                   <button
                     key={subIdx}
                     onClick={() => {
-                      if (subIdx > 2 && !isAuthenticated) {
+                      if (subIdx > 2 && !user) {
                         setShowSignUpModal(true);
                         return;
                       }

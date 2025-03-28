@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useAuthStore } from '../store/useStore';
 
 interface SignUpModalProps {
   onClose: () => void;
@@ -10,8 +11,11 @@ interface SignUpModalProps {
 export const SignUpModal: React.FC<SignUpModalProps> = ({ onClose, onSignUp }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [fullName, setFullName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const setUser = useAuthStore((state) => state.setUser);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,13 +23,23 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({ onClose, onSignUp }) =
     setError('');
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            username,
+            full_name: fullName,
+          },
+        },
       });
 
       if (error) throw error;
-      onSignUp();
+      
+      if (data.user) {
+        setUser(data.user);
+        onSignUp();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -49,6 +63,36 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({ onClose, onSignUp }) =
         </p>
 
         <form onSubmit={handleSignUp} className="space-y-4">
+          <div>
+            <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-1">
+              Username
+            </label>
+            <input
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full px-4 py-2 rounded bg-gray-800 border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
+              required
+              minLength={3}
+              maxLength={20}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="fullName" className="block text-sm font-medium text-gray-300 mb-1">
+              Full Name
+            </label>
+            <input
+              type="text"
+              id="fullName"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              className="w-full px-4 py-2 rounded bg-gray-800 border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
+              required
+            />
+          </div>
+
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
               Email

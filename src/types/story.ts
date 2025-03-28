@@ -14,3 +14,12 @@ export interface Story {
   prologue?: string;
   chapters: Chapter[];
 }
+
+export interface Bookmark {
+  id: string;
+  user_id: string;
+  chapter_index: number;
+  sub_chapter_index: number;
+  created_at: string;
+  updated_at: string;
+}
